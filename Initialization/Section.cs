@@ -1,42 +1,41 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Initialization
 {
-    class Section
+    class Section : IPositionable
     {
         protected string _name;
+        protected ParameterCollection _parameters;
+        protected List<Comment> _comments;
 
-        public virtual string Name
+        public Section(string name)
+        {
+            _name = name;
+            _parameters = new ParameterCollection();
+            _comments = new List<Comment>();
+        }
+
+        public string Name
         {
             get { return _name; }
             set { _name = value; }
         }
-    }
 
-    class SectionCollection
-    {
-        protected Dictionary<string, Section> _sections;
-
-        public SectionCollection()
+        public ParameterCollection Parameters
         {
-            _sections = new Dictionary<string, Section>();
+            get { return _parameters; }
+            set { _parameters = value; }
         }
 
-        public virtual IEnumerator<Section> GetEnumerator()
+        public List<Comment> Comments
         {
-            return _sections.Values.GetEnumerator();
+            get { return _comments; }
+            set { _comments = value; }
         }
 
-        public virtual void Add(Section section)
-        {
-
-        }
-
-        public virtual void Remove(Section section)
-        {
-
-        }
+        public int Line { get; }
+        public int Offset { get; }
     }
 }

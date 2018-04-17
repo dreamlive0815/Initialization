@@ -1,14 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿
 namespace Initialization
 {
-    class Parameter
+    class Parameter : IPositionable
     {
         protected string _key;
         protected string _value;
 
-        public virtual string Key 
+        public Parameter(string key) : this(key, null)
+        {
+        }
+
+        public Parameter(string key, string value)
+        {
+            _key = key;
+            _value = value;
+        }
+
+        public string Key 
         {
             get { return _key; }
             set { _key = value; }
@@ -19,5 +27,10 @@ namespace Initialization
             get { return _value; }
             set { _value = value; }
         }
+
+        public Comment Comment { get; set; }
+
+        public int Line { get; }
+        public int Offset { get; }
     }
 }

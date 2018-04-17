@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿
 namespace Initialization
 {
-    class Comment
+    class Comment : IPositionable
     {
         protected string _content;
 
@@ -13,6 +11,8 @@ namespace Initialization
             set { _content = value; }
         }
 
-        
+        public int Line { get; }
+        public int Offset { get; }
+
     }
 }
