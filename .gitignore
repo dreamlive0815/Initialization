@@ -1,5 +1,10 @@
 /.vscode
 /bin
 /obj
+/Properties
 Initialization.csproj
 Program.cs
+App.config
+Frm.cs
+Frm.Designer.cs
+Frm.resx
