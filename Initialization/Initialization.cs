@@ -85,22 +85,14 @@ namespace Initialization
                 string key = null; int keyP;
                 string name = null; int nameP;
                 string comment = null; int commentP;
+                int tp;//第一个非空格字符位置
                 var line = lines[i];
                 var sr = new StringReader(line);
-                
                 int c;
                 for(int p = 0; p < line.Length; p++)
                 {
-                    if ((c = sr.Read()) == 0)
-                    {
-                        if (key != null)
-                        {
-                            name = buffer.ToString();
-                            buffer.Clear();
-                        }
-                        break;
-                    }
-                    if (c == ' ' && buffer.Length == 0) continue;
+                    c = sr.Read();
+                    if (c == ' ' && buffer.Length == 0) continue;//跳过前导空格
                     if (c == ';')
                     {
                         if (key != null)
@@ -111,14 +103,37 @@ namespace Initialization
                         comment = sr.ReadToEnd(); commentP = p;
                         break;
                     }
+                    else if (c == '[')
+                    {
+                        
+                    }
                     else if (c == '=')
                     {
 
                     }
+                    if(buffer.Length == 0) tp = 0;
 
                     buffer.Append((char)c);
                 }
+                if(key != null) name = buffer.ToString();
+                buffer.Clear();
             }
+        }
+    }
+
+    class InitializationFileParseException : Exception, IPositionable
+    {
+        public int Line { get; set; }
+
+        public int Offset { get; set; }
+
+        public string Content { get; set; }
+
+        public InitializationFileParseException(string content, int line, int offset)
+        {
+            Content = content;
+            Line = line;
+            Offset = offset;
         }
     }
 }
