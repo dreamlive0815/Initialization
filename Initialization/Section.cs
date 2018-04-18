@@ -17,6 +17,12 @@ namespace Initialization
             _comments = new List<Comment>();
         }
 
+        public Section(string name, int line, int offset) : this(name)
+        {
+            Line = line;
+            Offset = offset;
+        }
+
         public string Name
         {
             get { return _name; }

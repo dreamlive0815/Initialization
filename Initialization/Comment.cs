@@ -5,6 +5,17 @@ namespace Initialization
     {
         protected string _content;
 
+        public Comment(string content)
+        {
+            _content = content;
+        }
+
+        public Comment(string content, int line, int offset) : this(content)
+        {
+            Line = line;
+            Offset = offset;
+        }
+
         public string Content
         {
             get { return _content; }

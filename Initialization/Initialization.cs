@@ -44,7 +44,7 @@ namespace Initialization
 
         public Initialization(string filePath, Encoding encoding) : this()
         {
-            ParseFromFile(filePath, encoding);
+            FileName = ParseFromFile(filePath, encoding);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -57,7 +57,7 @@ namespace Initialization
             return Sections.GetEnumerator();
         }
 
-        public string FileName { get; set; }
+        public string FileName { get; }
 
         public SectionCollection Sections
         {
@@ -71,7 +71,7 @@ namespace Initialization
             set { _comments = value; }
         }
 
-        protected void ParseFromFile(string filePath, Encoding encoding)
+        protected string ParseFromFile(string filePath, Encoding encoding)
         {
             var info = new FileInfo(filePath);
             if (!info.Exists) throw new IOException(string.Format("未能找到文件:{0}", info.Name));
@@ -82,46 +82,95 @@ namespace Initialization
             var buffer = new StringBuilder();
             for(int i = 0; i < lines.Length; ++i)
             {
-                string key = null; int keyP;
-                string name = null; int nameP;
-                string comment = null; int commentP;
-                int tp;//第一个非空格字符位置
                 var line = lines[i];
-                var sr = new StringReader(line);
-                int c;
+                var lineId = i + 1;
+                string key = null; int keyP = 0;
+                string value = null; //int valueP = 0;
+                Comment comment = null;
+                bool newSection = false;
+                int tp = 0;//第一个非空格字符位置
+                
+                var sr = new StringReader(line); char c;
                 for(int p = 0; p < line.Length; p++)
                 {
-                    c = sr.Read();
-                    if (c == ' ' && buffer.Length == 0) continue;//跳过前导空格
+                    var ci = sr.Read();
+                    c = (char)ci;
+                    if ((c == ' ' || c == '\t') && buffer.Length == 0) continue;//跳过前导空白字符
                     if (c == ';')
                     {
-                        if (key != null)
-                        {
-                            name = buffer.ToString();
-                            buffer.Clear();
-                        }
-                        comment = sr.ReadToEnd(); commentP = p;
+                        comment = new Comment(sr.ReadToEnd(), lineId, p);
                         break;
+                    }
+                    //if (newSection) throw new FileParseException("[Section]后不允许存在非注释内容", line, lineId, p);
+                    if (c == '=')
+                    {
+                        if(key == null && !newSection)
+                        {
+                            key = buffer.Pull();
+                            if (key.Length == 0) throw new FileParseException("Key不能为空", line, lineId, p);
+                            keyP = tp;
+                            continue;
+                        }
                     }
                     else if (c == '[')
                     {
-                        
+                        if(key == null)
+                        {
+                            if (buffer.Length != 0) throw new FileParseException("[Section]前不允许存在字符且必须独占一行", line, lineId, p);
+                            continue;
+                        }
                     }
-                    else if (c == '=')
+                    else if (c == ']')
                     {
-
+                        if(key == null)
+                        {
+                            if (buffer.Length == 0) throw new FileParseException("[Section]名称不能为空", line, lineId, p);
+                            if (section != null) _sections[section.Name] = section;
+                            section = new Section(buffer.Pull().Trim(), lineId, p);
+                            newSection = true;
+                            continue;
+                        }
                     }
-                    if(buffer.Length == 0) tp = 0;
-
+                    if(buffer.Length == 0) tp = p;
                     buffer.Append((char)c);
                 }
-                if(key != null) name = buffer.ToString();
+                Parameter parameter = null;
+                if(key != null)
+                {
+                    key = key.Trim();
+                    value = buffer.ToString().Trim();
+                    parameter = new Parameter(key, value, lineId, keyP);
+                }
+                if(comment != null)
+                {
+                    if (parameter != null) parameter.Comment = comment;
+                    else if (section != null) section.Comments.Add(comment);
+                    else Comments.Add(comment);
+                }
+                if(parameter != null)
+                {
+                    if (section == null) throw new FileParseException(string.Format("键值对{0}={1}不属于任何Section", key, value), line, lineId, parameter.Offset);
+                    section.Parameters[parameter.Key] = parameter;
+                }
                 buffer.Clear();
             }
+            if (section != null) _sections[section.Name] = section;
+
+            return info.FullName;
         }
     }
 
-    class InitializationFileParseException : Exception, IPositionable
+    static class StringBuilderEx
+    {
+        public static string Pull(this StringBuilder sb)
+        {
+            var s = sb.ToString();
+            sb.Clear();
+            return s;
+        }
+    }
+
+    class FileParseException : Exception, IPositionable
     {
         public int Line { get; set; }
 
@@ -129,11 +178,24 @@ namespace Initialization
 
         public string Content { get; set; }
 
-        public InitializationFileParseException(string content, int line, int offset)
+        public FileParseException(string message) : base(message)
+        {
+        }
+
+        public FileParseException(string message, string content, int line, int offset) : this(message)
         {
             Content = content;
             Line = line;
             Offset = offset;
+        }
+
+        public override string Message
+        {
+            get
+            {
+                var messgae = string.Format(@"{3}{0}{3}第 {4} 行 第 {5} 个字符{3}{1}{3}{2}^", base.Message, Content, new string(' ', Offset), Environment.NewLine, Line, Offset + 1);
+                return messgae;
+            }
         }
     }
 }

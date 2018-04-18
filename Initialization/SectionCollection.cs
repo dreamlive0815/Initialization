@@ -45,7 +45,8 @@ namespace Initialization
 
         public virtual void Add(Section section)
         {
-            if (_sections.ContainsKey(section.Name)) throw new ArgumentException("同名的Section已存在");
+            if (section == null) throw new ArgumentNullException("section不能为null");
+            if (_sections.ContainsKey(section.Name)) throw new ArgumentException(string.Format("同名的Section已存在:{0}", section.Name));
             _sections.Add(section.Name, section);
         }
 
@@ -56,6 +57,7 @@ namespace Initialization
 
         public bool Remove(Section section)
         {
+            if (section == null) throw new ArgumentNullException("section不能为null");
             return Remove(section.Name);
         }
     }

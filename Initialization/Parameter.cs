@@ -6,14 +6,16 @@ namespace Initialization
         protected string _key;
         protected string _value;
 
-        public Parameter(string key) : this(key, null)
-        {
-        }
-
         public Parameter(string key, string value)
         {
             _key = key;
             _value = value;
+        }
+
+        public Parameter(string key, string value, int line, int offset) : this(key, value)
+        {
+            Line = line;
+            Offset = offset;
         }
 
         public string Key 

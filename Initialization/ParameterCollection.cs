@@ -45,7 +45,8 @@ namespace Initialization
 
         public virtual void Add(Parameter parameter)
         {
-            if (_parameters.ContainsKey(parameter.Key)) throw new ArgumentException("相同键名的Parameter已存在");
+            if (parameter == null) throw new ArgumentNullException("parameter不能为null");
+            if (_parameters.ContainsKey(parameter.Key)) throw new ArgumentException(string.Format("相同键名的Parameter已存在:{0}", parameter.Key));
             _parameters.Add(parameter.Key, parameter);
         }
 
@@ -56,6 +57,7 @@ namespace Initialization
 
         public bool Remove(Parameter parameter)
         {
+            if (parameter == null) throw new ArgumentNullException("parameter不能为null");
             return Remove(parameter.Key);
         }
     }
