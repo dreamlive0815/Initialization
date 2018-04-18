@@ -6,5 +6,7 @@ namespace Initialization
         int Line { get; }
 
         int Offset { get; }
+
+        string ToString(bool withComment);
     }
 }

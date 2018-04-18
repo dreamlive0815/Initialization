@@ -96,34 +96,25 @@ namespace Initialization
                     var ci = sr.Read();
                     c = (char)ci;
                     if ((c == ' ' || c == '\t') && buffer.Length == 0) continue;//跳过前导空白字符
-                    if (c == ';')
-                    {
+                    if (c == ';') {
                         comment = new Comment(sr.ReadToEnd(), lineId, p);
                         break;
                     }
                     //if (newSection) throw new FileParseException("[Section]后不允许存在非注释内容", line, lineId, p);
-                    if (c == '=')
-                    {
-                        if(key == null && !newSection)
-                        {
+                    if (c == '=') {
+                        if(key == null && !newSection) {
                             key = buffer.Pull();
                             if (key.Length == 0) throw new FileParseException("Key不能为空", line, lineId, p);
                             keyP = tp;
                             continue;
                         }
-                    }
-                    else if (c == '[')
-                    {
-                        if(key == null)
-                        {
+                    } else if (c == '[') {
+                        if(key == null) {
                             if (buffer.Length != 0) throw new FileParseException("[Section]前不允许存在字符且必须独占一行", line, lineId, p);
                             continue;
                         }
-                    }
-                    else if (c == ']')
-                    {
-                        if(key == null)
-                        {
+                    } else if (c == ']') {
+                        if(key == null) {
                             if (buffer.Length == 0) throw new FileParseException("[Section]名称不能为空", line, lineId, p);
                             if (section != null) _sections[section.Name] = section;
                             section = new Section(buffer.Pull().Trim(), lineId, p);
@@ -135,20 +126,17 @@ namespace Initialization
                     buffer.Append((char)c);
                 }
                 Parameter parameter = null;
-                if(key != null)
-                {
+                if(key != null) {
                     key = key.Trim();
                     value = buffer.ToString().Trim();
                     parameter = new Parameter(key, value, lineId, keyP);
                 }
-                if(comment != null)
-                {
+                if(comment != null) {
                     if (parameter != null) parameter.Comment = comment;
                     else if (section != null) section.Comments.Add(comment);
                     else Comments.Add(comment);
                 }
-                if(parameter != null)
-                {
+                if(parameter != null) {
                     if (section == null) throw new FileParseException(string.Format("键值对{0}={1}不属于任何Section", key, value), line, lineId, parameter.Offset);
                     section.Parameters[parameter.Key] = parameter;
                 }
@@ -157,6 +145,54 @@ namespace Initialization
             if (section != null) _sections[section.Name] = section;
 
             return info.FullName;
+        }
+
+        public override string ToString()
+        {
+            return ToString(true);
+        }
+
+        public string ToString(bool withComment)
+        {
+            var sb = new StringBuilder();
+            var nl = Environment.NewLine;
+            if(withComment)
+            {
+                foreach (var comment in _comments)
+                {
+                    sb.Append(comment.ToString());
+                    sb.Append(nl);
+                }
+            }
+            foreach(var section in _sections)
+            {
+                sb.Append(section.ToString(withComment));
+                sb.Append(nl);
+            }
+
+            return sb.ToString();
+        }
+
+        public string Save(string fileName)
+        {
+            return Save(fileName, true);
+        }
+
+        public string Save(string fileName, bool withComment)
+        {
+            return Save(fileName, withComment, Encoding.UTF8);
+        }
+
+        public string Save(string fileName, bool withComment, Encoding encoding)
+        {
+            if (!fileName.EndsWith(".ini")) fileName += ".ini";
+            var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+            var s = ToString(withComment);
+            var bytes = encoding.GetBytes(s);
+            fileStream.Write(bytes, 0, bytes.Length);
+            fileStream.Flush();
+            fileStream.Close();
+            return new FileInfo(fileName).FullName;
         }
     }
 
@@ -170,7 +206,7 @@ namespace Initialization
         }
     }
 
-    class FileParseException : Exception, IPositionable
+    class FileParseException : Exception
     {
         public int Line { get; set; }
 

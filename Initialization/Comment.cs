@@ -25,5 +25,15 @@ namespace Initialization
         public int Line { get; }
         public int Offset { get; }
 
+        public override string ToString()
+        {
+            return ToString(true);
+        }
+
+        public string ToString(bool withComment)
+        {
+            return string.Format(";{0}", _content);
+        }
+
     }
 }

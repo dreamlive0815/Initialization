@@ -34,5 +34,17 @@ namespace Initialization
 
         public int Line { get; }
         public int Offset { get; }
+
+
+        public override string ToString()
+        {
+            return ToString(true);
+        }
+
+        public string ToString(bool withComment)
+        {
+            withComment = withComment && (Comment != null);
+            return string.Format("{0}={1}{3}{2}", Key, Value, withComment ? Comment.ToString() : null, withComment ? "\t" : "");
+        }
     }
 }
