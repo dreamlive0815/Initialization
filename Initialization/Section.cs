@@ -79,10 +79,10 @@ namespace Initialization
             sb.Append(nl);
             var list = _parameters.Cast<IPositionable>().ToList();
             if (withComment) list.AddRange(_comments);
-            var lines = OrderBy(list).ToList();
-            foreach(var line in lines)
+            var items = OrderBy(list).ToList();
+            foreach(var item in items)
             {
-                sb.Append(line.ToString(withComment));
+                sb.Append(item.ToString(withComment));
                 sb.Append(nl);
             }
             return sb.ToString();
