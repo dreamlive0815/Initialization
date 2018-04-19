@@ -127,7 +127,7 @@ namespace Initialization
             if (!info.Exists) throw new IOException(string.Format("未能找到文件:{0}", info.Name));
             if (info.Extension != ".ini") throw new ArgumentException("文件必须是扩展名为ini的配置文件");
             _fileName = info.FullName;
-            var lines = File.ReadAllLines(filePath);
+            var lines = File.ReadAllLines(filePath, encoding);
 
             Section section = null;
             var buffer = new StringBuilder();

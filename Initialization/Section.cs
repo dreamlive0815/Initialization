@@ -72,11 +72,6 @@ namespace Initialization
             return ToString(true);
         }
 
-        protected virtual IOrderedEnumerable<IPositionable> OrderBy(IEnumerable<IPositionable> items)
-        {
-            return items.OrderBy(i => i.Line);
-        }
-
         public virtual string ToString(bool withComment)
         {
             var sb = new StringBuilder();
@@ -85,7 +80,7 @@ namespace Initialization
             sb.Append(nl);
             var list = _parameters.Cast<IPositionable>().ToList();
             if (withComment) list.AddRange(_comments);
-            var items = OrderBy(list).ToList();
+            var items = list.OrderBy(i => i.Line);
             foreach(var item in items)
             {
                 sb.Append(item.ToString(withComment));
