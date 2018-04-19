@@ -12,6 +12,9 @@ namespace Initialization
         protected ParameterCollection _parameters;
         protected List<Comment> _comments;
 
+        protected int _line;
+        protected int _offset;
+
         public Section(string name)
         {
             _name = name;
@@ -21,8 +24,14 @@ namespace Initialization
 
         public Section(string name, int line, int offset) : this(name)
         {
-            Line = line;
-            Offset = offset;
+            _line = line;
+            _offset = offset;
+        }
+
+        public Parameter this[string key]
+        {
+            get { return _parameters[key]; }
+            set { _parameters[key] = value; }
         }
 
         public string Name
@@ -43,15 +52,21 @@ namespace Initialization
             set { _comments = value; }
         }
 
-        public int Line { get; }
-        public int Offset { get; }
+        public virtual int Line
+        {
+            get { return _line; }
+        }
+        public virtual int Offset
+        {
+            get { return _offset; }
+        }
 
         public override string ToString()
         {
             return ToString(true);
         }
 
-        public string ToString(bool withComment)
+        public virtual string ToString(bool withComment)
         {
             var sb = new StringBuilder();
             var nl = Environment.NewLine;

@@ -43,11 +43,12 @@ namespace Initialization
             }
         }
 
-        public virtual void Add(Parameter parameter)
+        public virtual Parameter Add(Parameter parameter)
         {
             if (parameter == null) throw new ArgumentNullException("parameter不能为null");
             if (_parameters.ContainsKey(parameter.Key)) throw new ArgumentException(string.Format("相同键名的Parameter已存在:{0}", parameter.Key));
             _parameters.Add(parameter.Key, parameter);
+            return parameter;
         }
 
         public virtual bool Remove(string key)

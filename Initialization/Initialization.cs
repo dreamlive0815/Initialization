@@ -9,6 +9,7 @@ namespace Initialization
 {
     class Initialization : IEnumerable<Section>
     {
+        private string _fileName;
 
         [DllImport("kernel32")]
         private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
@@ -44,7 +45,7 @@ namespace Initialization
 
         public Initialization(string filePath, Encoding encoding) : this()
         {
-            FileName = ParseFromFile(filePath, encoding);
+            ParseFromFile(filePath, encoding);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -57,7 +58,16 @@ namespace Initialization
             return Sections.GetEnumerator();
         }
 
-        public string FileName { get; }
+        public Section this[string name]
+        {
+            get { return _sections[name]; }
+            set { _sections[name] = value; }
+        }
+
+        public string FileName
+        {
+            get { return _fileName; }
+        }
 
         public SectionCollection Sections
         {
@@ -71,11 +81,41 @@ namespace Initialization
             set { _comments = value; }
         }
 
-        protected string ParseFromFile(string filePath, Encoding encoding)
+        public Parameter GetParameter(string section, string key)
+        {
+            var sec = _sections[section];
+            return sec?[key];
+        }
+
+        public string Read(string section, string key)
+        {
+            var par = GetParameter(section, key);
+            return par?.Value;
+        }
+
+        public bool Write(string section, string key, string value)
+        {
+            var par = GetParameter(section, key);
+            if (par == null) return false;
+            par.Value = value;
+            return true;
+        }
+
+        public void WriteNew(string section, string key, string value)
+        {
+            var sec = _sections[section];
+            if(sec == null) sec = _sections.Add(new Section(section));
+            var par = sec[key];
+            if (par == null) par = sec.Parameters.Add(new Parameter(key, value));
+            par.Value = value;
+        }
+
+        public int ParseFromFile(string filePath, Encoding encoding)
         {
             var info = new FileInfo(filePath);
             if (!info.Exists) throw new IOException(string.Format("未能找到文件:{0}", info.Name));
             if (info.Extension != ".ini") throw new ArgumentException("文件必须是扩展名为ini的配置文件");
+            _fileName = info.FullName;
             var lines = File.ReadAllLines(filePath);
 
             Section section = null;
@@ -144,7 +184,7 @@ namespace Initialization
             }
             if (section != null) _sections[section.Name] = section;
 
-            return info.FullName;
+            return lines.Length;
         }
 
         public override string ToString()
@@ -152,25 +192,27 @@ namespace Initialization
             return ToString(true);
         }
 
-        public string ToString(bool withComment)
+        public virtual string ToString(bool withComment)
         {
             var sb = new StringBuilder();
             var nl = Environment.NewLine;
-            if(withComment)
-            {
-                foreach (var comment in _comments)
-                {
+            if(withComment) {
+                foreach (var comment in _comments) {
                     sb.Append(comment.ToString());
                     sb.Append(nl);
                 }
             }
-            foreach(var section in _sections)
-            {
+            foreach(var section in _sections) {
                 sb.Append(section.ToString(withComment));
                 sb.Append(nl);
             }
 
             return sb.ToString();
+        }
+
+        public string Save()
+        {
+            return Save(_fileName);
         }
 
         public string Save(string fileName)
@@ -185,6 +227,7 @@ namespace Initialization
 
         public string Save(string fileName, bool withComment, Encoding encoding)
         {
+            if (fileName == null) throw new ArgumentNullException("文件路径不能为空");
             if (!fileName.EndsWith(".ini")) fileName += ".ini";
             var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
             var s = ToString(withComment);

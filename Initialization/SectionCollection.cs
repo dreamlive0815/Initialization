@@ -24,30 +24,31 @@ namespace Initialization
             return _sections.Values.GetEnumerator();
         }
 
-        public Section this[string key]
+        public Section this[string name]
         {
             get {
-                if (_sections.ContainsKey(key)) {
-                    return _sections[key];
+                if (_sections.ContainsKey(name)) {
+                    return _sections[name];
                 } else {
                     return null;
                 }
             }
             set {
-                if (key != value.Name) throw new ArgumentException("所设置的键与Section的名称不一致");
-                if (_sections.ContainsKey(key)) {
-                    _sections[key] = value;
+                if (name != value.Name) throw new ArgumentException("所设置的键与Section的名称不一致");
+                if (_sections.ContainsKey(name)) {
+                    _sections[name] = value;
                 } else {
                     Add(value);
                 }
             }
         }
 
-        public virtual void Add(Section section)
+        public virtual Section Add(Section section)
         {
             if (section == null) throw new ArgumentNullException("section不能为null");
             if (_sections.ContainsKey(section.Name)) throw new ArgumentException(string.Format("同名的Section已存在:{0}", section.Name));
             _sections.Add(section.Name, section);
+            return section;
         }
 
         public virtual bool Remove(string key)

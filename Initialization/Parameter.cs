@@ -5,6 +5,10 @@ namespace Initialization
     {
         protected string _key;
         protected string _value;
+        protected Comment _comment;
+
+        protected int _line;
+        protected int _offset;
 
         public Parameter(string key, string value)
         {
@@ -14,8 +18,8 @@ namespace Initialization
 
         public Parameter(string key, string value, int line, int offset) : this(key, value)
         {
-            Line = line;
-            Offset = offset;
+            _line = line;
+            _offset = offset;
         }
 
         public string Key 
@@ -30,10 +34,20 @@ namespace Initialization
             set { _value = value; }
         }
 
-        public Comment Comment { get; set; }
+        public Comment Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
+        }
 
-        public int Line { get; }
-        public int Offset { get; }
+        public virtual int Line
+        {
+            get { return _line; }
+        }
+        public virtual int Offset
+        {
+            get { return _offset; }
+        }
 
 
         public override string ToString()
@@ -41,7 +55,7 @@ namespace Initialization
             return ToString(true);
         }
 
-        public string ToString(bool withComment)
+        public virtual string ToString(bool withComment)
         {
             withComment = withComment && (Comment != null);
             return string.Format("{0}={1}{3}{2}", Key, Value, withComment ? Comment.ToString() : null, withComment ? "\t" : "");
