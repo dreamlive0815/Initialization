@@ -43,13 +43,19 @@ namespace Initialization
         public ParameterCollection Parameters
         {
             get { return _parameters; }
-            set { _parameters = value; }
+            set {
+                if(_parameters == null) throw new ArgumentNullException("Parameters不能为null");
+                _parameters = value;
+            }
         }
 
         public List<Comment> Comments
         {
             get { return _comments; }
-            set { _comments = value; }
+            set {
+                if(_comments == null) throw new ArgumentNullException("Comments不能为null");
+                _comments = value;
+            }
         }
 
         public virtual int Line

@@ -41,6 +41,7 @@ namespace Initialization
                 }
             }
             set {
+                if (value == null) throw new ArgumentNullException("Parameter不能为null");
                 if (key != value.Key) throw new ArgumentException("所设置的键与Parameter的键名不一致");
                 if (_parameters.ContainsKey(key)) {
                     _parameters[key] = value;
@@ -52,7 +53,7 @@ namespace Initialization
 
         public virtual Parameter Add(Parameter parameter)
         {
-            if (parameter == null) throw new ArgumentNullException("parameter不能为null");
+            if (parameter == null) throw new ArgumentNullException("Parameter不能为null");
             if (_parameters.ContainsKey(parameter.Key)) throw new ArgumentException(string.Format("相同键名的Parameter已存在:{0}", parameter.Key));
             _parameters.Add(parameter.Key, parameter);
             return parameter;

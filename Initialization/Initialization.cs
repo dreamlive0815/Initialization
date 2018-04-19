@@ -72,13 +72,19 @@ namespace Initialization
         public SectionCollection Sections
         {
             get { return _sections; }
-            set { _sections = value; }
+            set {
+                if(_sections == null) throw new ArgumentNullException("Sections不能为null");
+                _sections = value;
+            }
         }
 
         public List<Comment> Comments
         {
             get { return _comments; }
-            set { _comments = value; }
+            set {
+                if(_comments == null) throw new ArgumentNullException("Comments不能为null");
+                _comments = value;
+            }
         }
 
         public Parameter GetParameter(string section, string key)

@@ -40,6 +40,7 @@ namespace Initialization
                 }
             }
             set {
+                if (value == null) throw new ArgumentNullException("Section不能为null");
                 if (name != value.Name) throw new ArgumentException("所设置的键与Section的名称不一致");
                 if (_sections.ContainsKey(name)) {
                     _sections[name] = value;
@@ -51,7 +52,7 @@ namespace Initialization
 
         public virtual Section Add(Section section)
         {
-            if (section == null) throw new ArgumentNullException("section不能为null");
+            if (section == null) throw new ArgumentNullException("Section不能为null");
             if (_sections.ContainsKey(section.Name)) throw new ArgumentException(string.Format("同名的Section已存在:{0}", section.Name));
             _sections.Add(section.Name, section);
             return section;
