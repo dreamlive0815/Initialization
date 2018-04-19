@@ -19,9 +19,14 @@ namespace Initialization
             return GetEnumerator();
         }
 
-        public IEnumerator<Section> GetEnumerator()
+        public virtual IEnumerator<Section> GetEnumerator()
         {
             return _sections.Values.GetEnumerator();
+        }
+
+        public virtual Section GetNewSection(string name, int line, int offset)
+        {
+            return new Section(name, line, offset);
         }
 
         public Section this[string name]

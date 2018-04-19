@@ -1,12 +1,10 @@
 ﻿
 namespace Initialization
 {
-    interface IPositionable
+    interface IPositionable : IStringable
     {
         int Line { get; }
 
         int Offset { get; }
-
-        string ToString(bool withComment);
     }
 }

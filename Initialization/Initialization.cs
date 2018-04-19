@@ -110,7 +110,12 @@ namespace Initialization
             par.Value = value;
         }
 
-        public int ParseFromFile(string filePath, Encoding encoding)
+        public int ParseFromFile(string filePath)
+        {
+            return ParseFromFile(filePath, Encoding.UTF8);
+        }
+
+        public virtual int ParseFromFile(string filePath, Encoding encoding)
         {
             var info = new FileInfo(filePath);
             if (!info.Exists) throw new IOException(string.Format("未能找到文件:{0}", info.Name));
@@ -157,7 +162,7 @@ namespace Initialization
                         if(key == null) {
                             if (buffer.Length == 0) throw new FileParseException("[Section]名称不能为空", line, lineId, p);
                             if (section != null) _sections[section.Name] = section;
-                            section = new Section(buffer.Pull().Trim(), lineId, p);
+                            section = _sections.GetNewSection(buffer.Pull().Trim(), lineId, p);
                             newSection = true;
                             continue;
                         }
@@ -169,7 +174,8 @@ namespace Initialization
                 if(key != null) {
                     key = key.Trim();
                     value = buffer.ToString().Trim();
-                    parameter = new Parameter(key, value, lineId, keyP);
+                    if (section == null) throw new FileParseException(string.Format("键值对{0}={1}不属于任何Section", key, value), line, lineId, keyP);
+                    parameter = section.Parameters.GetNewParameter(key, value, lineId, keyP);
                 }
                 if(comment != null) {
                     if (parameter != null) parameter.Comment = comment;
@@ -177,7 +183,6 @@ namespace Initialization
                     else Comments.Add(comment);
                 }
                 if(parameter != null) {
-                    if (section == null) throw new FileParseException(string.Format("键值对{0}={1}不属于任何Section", key, value), line, lineId, parameter.Offset);
                     section.Parameters[parameter.Key] = parameter;
                 }
                 buffer.Clear();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using ParameterContainer = System.Collections.Generic.Dictionary<string, Initialization.Parameter>;
@@ -19,9 +20,14 @@ namespace Initialization
             return GetEnumerator();
         }
 
-        public IEnumerator<Parameter> GetEnumerator()
+        public virtual IEnumerator<Parameter> GetEnumerator()
         {
             return _parameters.Values.GetEnumerator();
+        }
+
+        public virtual Parameter GetNewParameter(string key, string value, int line, int offset)
+        {
+            return new Parameter(key, value, line, offset);
         }
 
         public Parameter this[string key]
