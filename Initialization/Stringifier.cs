@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
@@ -66,6 +67,24 @@ namespace Initialization
             }
 
             return sb.ToString();
+        }
+
+        public string Save(string fileName)
+        {
+            return Save(fileName, Encoding.UTF8);
+        }
+
+        public string Save(string fileName, Encoding encoding)
+        {
+            if(fileName == null) throw new ArgumentNullException("文件名不能为空");
+            if (!fileName.EndsWith(".ini")) fileName += ".ini";
+            var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+            var s = Stringify();
+            var bytes = encoding.GetBytes(s);
+            fileStream.Write(bytes, 0, bytes.Length);
+            fileStream.Flush();
+            fileStream.Close();
+            return new FileInfo(fileName).FullName;
         }
     }
 
